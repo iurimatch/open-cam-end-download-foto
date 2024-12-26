@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Camera and Photo Capture</title>
+    <style>
+        video, canvas {
+            width: 100%;
+            max-width: 500px;
+            margin-top: 10px;
+        }
+        #capture-photo {
+            display: none;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Camera and Photo Capture</h1>
+    <a href="#" id="start-camera">Click here to turn on the camera</a>
+    <video id="video-feed" autoplay playsinline style="display: none;"></video>
+    <button id="capture-photo" style="display: none;">Take Photo</button>
+    <canvas id="photo-canvas" style="display: none;"></canvas>
+    <a id="download-link" style="display: none;" download="photo.png">Download Photo</a>
+
+    <script>
+        const startCameraLink = document.getElementById('start-camera');
+        const videoFeed = document.getElementById('video-feed');
+        const capturePhotoButton = document.getElementById('capture-photo');
+        const canvas = document.getElementById('photo-canvas');
+        const downloadLink = document.getElementById('download-link');
+
+        let videoStream;
+
+        startCameraLink.addEventListener('click', async (event) => {
+            event.preventDefault(); // Prevent default anchor behavior
+
+            try {
+                // Access the user's camera
+                videoStream = await navigator.mediaDevices.getUserMedia({ video: true });
+
+                // Display the video feed
+                videoFeed.srcObject = videoStream;
+                videoFeed.style.display = 'block';
+                capturePhotoButton.style.display = 'inline-block';
+            } catch (error) {
+                alert('Unable to access the camera: ' + error.message);
+            }
+        });
+
+        capturePhotoButton.addEventListener('click', () => {
+            // Set the canvas dimensions to match the video feed
+            canvas.width = videoFeed.videoWidth;
+            canvas.height = videoFeed.videoHeight;
+
+            // Draw the current video frame onto the canvas
+            const context = canvas.getContext('2d');
+            context.drawImage(videoFeed, 0, 0, canvas.width, canvas.height);
+
+            // Convert the canvas content to a data URL
+            const photoDataURL = canvas.toDataURL('image/png');
+
+            // Create a download link for the photo
+            downloadLink.href = photoDataURL;
+            downloadLink.style.display = 'inline-block';
+            downloadLink.textContent = 'Download Photo';
+        });
+    </script>
+</body>
+</html>
